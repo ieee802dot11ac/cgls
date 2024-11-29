@@ -1,18 +1,29 @@
 #include "draw.h"
 #include <assert.h>
+#include "tex.h"
 #include "vmem.h"
 #include "glad/glad.h"
 #include "shader.h"
 #include <SDL2/SDL_stdinc.h>
 #include <string.h>
 
-float vtxes[12] = {
-    -0.66, 0.66, 0,
-    -0.66, -0.66, 0,
-    0.66, 0.66, 0,
-    0.66, -0.66, 0
+float vtxes[20] = {
+    -0.66, 0.66, 0, 0,1,
+    -0.66, -0.66, 0, 0,0,
+    0.66, 0.66, 0, 1,1,
+    0.66, -0.66, 0, 1,0
     };
-uint32_t program_tag, buf_tag, array_tag;
+uint32_t program_tag, texture_tag, array_tag;
+
+uint8_t tex[192] = { 0 };
+
+static void gen_checkerboard() {
+    for (int i = 0; i < 192; i += 3) {
+        tex[i  ] = i & 1 ? 0xFF : 0;
+        tex[i+1] = i & 1 ? 0xFF : 0;
+        tex[i+2] = i & 1 ? 0xFF : 0;
+    }
+}
 
 void init_ogl(int w, int h) {
     glViewport(0, 0, w, h);
@@ -20,6 +31,8 @@ void init_ogl(int w, int h) {
     glEnable(GL_DEPTH_TEST);
 
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+
+    gen_checkerboard();
 
     char* vtx_shader_mem;
     char* frag_shader_mem;
@@ -53,12 +66,15 @@ void init_ogl(int w, int h) {
     program_tag = new_program(vtx_tag, frag_tag);
     activate_program(program_tag);
 
-    buf_tag = new_array(vtxes, (12 * sizeof(float)), GL_STATIC_DRAW);
+    texture_tag = new_texture(4, 4, GL_RGB, GL_UNSIGNED_BYTE, tex);
+
+    array_tag = new_array(vtxes, sizeof(vtxes), GL_STATIC_DRAW);
 }
 
 void poll_ogl() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     activate_program(program_tag);
-    activate_array(buf_tag);
+    activate_texture(texture_tag);
+    activate_array(array_tag);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

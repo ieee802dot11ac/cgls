@@ -11,8 +11,10 @@ uint32_t new_array(void* buf, uint32_t bufsiz, int draw_variant) {
 
     glBufferData(GL_ARRAY_BUFFER, bufsiz, buf, draw_variant);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     return array_tag;
 }
